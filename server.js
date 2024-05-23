@@ -3,8 +3,11 @@ port = 3000;
 const express = require('express')
 const app = express()
 
+const nossoToken = require('./jwt/autentication')
+
 app.get('/', (req, res) => {
-    res.json({ message: "Olá mundo" })
+    res.json({message: 'Esse é o token!', token: nossoToken})
+    
 })
 
 app.listen(port); {
