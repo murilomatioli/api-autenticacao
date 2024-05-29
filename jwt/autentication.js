@@ -15,3 +15,4 @@ const nossoToken = jwt.sign(
 );
 
 module.exports = nossoToken;
+module.exports = secretKey;
