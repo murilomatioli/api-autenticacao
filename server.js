@@ -16,8 +16,7 @@ function verifyJWT(req, res, next) {
     if (!token) return res.status(401).json({ auth: false, message: 'Token não informado.' });
 
     jwt.verify(token, secretKey, function(err, decoded){
-        if (err) return res.status(500).json({ auth: false, message: 'Falha ao autenticar o token.' });
-
+        if (err) return res.status(401).json({ auth: false, message: 'Falha ao autenticar o token.' });
         req.userId = decoded.userId;
         next();
     });
@@ -26,7 +25,10 @@ function verifyJWT(req, res, next) {
 
 app.get('/', verifyJWT, (req, res) => {
     console.log('Acessou a rota com sucesso!')  
-    res.json({message: 'Esse é o token!', token: nossoToken})
+    res.json({
+        message: 'Esse é o token!', 
+        token: nossoToken,
+    })
 })
 
 app.post('/users', async (req, res) => {
@@ -73,7 +75,7 @@ app.post('/login', async (req, res) => {
             res.json({
                 message: `Autenticado como ${username}!`,
                 auth: true,
-                /*tokenAutenticacao*/
+                tokenAutenticacao
             })
            /* return res.status(200).json({ message: "Autenticado como " + req.body.username});*/
         }
