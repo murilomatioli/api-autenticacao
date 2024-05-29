@@ -55,11 +55,12 @@ app.post('/login', async (req, res) => {
         const user = await User.findOne({ username })
         const findPassword = await User.findOne({ password })
         if(!user) {
-            return res.status(402).json({ message: "Username incorreto"});
+            return res.status(403).json({ message: "Usuário ou senha incorretos"});
         }
-        if(!findPassword) {
-            return res.status(403).json({ message: "Senha incorreta"})
-        }
+        if (password !== user.password) {
+            return res.status(403).json({ message: "Usuário ou senha incorretos" });
+          }
+      
         if(user && findPassword){
             const tokenAutenticacao = jwt.sign(
                 {
