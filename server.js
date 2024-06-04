@@ -24,9 +24,8 @@ function verifyJWT(req, res, next) {
 
 
 app.get('/', verifyJWT, (req, res) => {
-    console.log('Acessou a rota com sucesso!')  
     res.json({
-        message: 'Esse é o token!', 
+        message: 'Acessou a rota com sucesso! Esse é o token: ', 
         token: nossoToken,
     })
 })
@@ -38,7 +37,7 @@ app.post('/users', async (req, res) => {
         const userSave = await newUser.save();
         res.json(userSave);
     } catch (err) {
-        res.status(400).json({ message: err.message})
+        ries.status(400).json({ message: err.message})
     }
 })
 

@@ -9,7 +9,7 @@ const nossoToken = jwt.sign(
     },
     secretKey,
     {
-        expiresIn: '1y',
+        expiresIn: '300',
         subject: '1',
     }
 );
