@@ -40,7 +40,7 @@ app.post('/users', async (req, res) => {
 
     try {
         const hash = await bcrypt.hash(password, saltRounds);
-        console.log('Senha criptografada: ', hash);
+        /*console.log('Senha criptografada: ', hash);*/
 
         const newUser = new User({ username, password: hash });
         const userSave = await newUser.save();
@@ -68,17 +68,18 @@ app.get('/users', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
+
     try {
         const user = await User.findOne({ username })
-        const findPassword = await User.findOne({ password })
+        const senhaCorreta = await bcrypt.compare(password, user.password)
         if(!user) {
+            return res.status(403).json({ message: "Usuário incorreto"})
+        }
+        if(!senhaCorreta) {
             return res.status(403).json({ message: "Usuário ou senha incorretos"});
         }
-        if (password !== user.password) {
-            return res.status(403).json({ message: "Usuário ou senha incorretos" });
-          }
       
-        if(user && findPassword){
+        if(user && senhaCorreta){
             const tokenAutenticacao = jwt.sign(
                 {
                     userId: user._id,
@@ -95,7 +96,7 @@ app.post('/login', async (req, res) => {
            /* return res.status(200).json({ message: "Autenticado como " + req.body.username});*/
         }
     } catch (err){
-        return res.status(500).json({ message: "Erro com o servidor"});
+        return res.status(403).json({ message: "Usuário ou senha incorretos"});
     }
 })
 app.delete('/users', async (req, res) => {
