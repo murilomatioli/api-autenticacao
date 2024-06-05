@@ -6,6 +6,11 @@ const secretKey = require('./jwt/autentication');
 require("./config/db/connection");
 const User = require('./config/db/models/User');
 
+//importa bcrypt e define 13 a complexidade da criptografia
+const bcrypt = require('bcrypt')
+const saltRounds = 13;
+
+
 
 const nossoToken = require('./jwt/autentication');
 
@@ -32,19 +37,30 @@ app.get('/', verifyJWT, (req, res) => {
 
 app.post('/users', async (req, res) => {
     const { username, password } = req.body;
+
     try {
-        const newUser = new User({ username, password });
+        const hash = await bcrypt.hash(password, saltRounds);
+        console.log('Senha criptografada: ', hash);
+
+        const newUser = new User({ username, password: hash });
         const userSave = await newUser.save();
+
         res.json(userSave);
     } catch (err) {
-        ries.status(400).json({ message: err.message})
+        console.error(err);
+        res.status(400).json({ message: err.message });
     }
-})
+});
 
 app.get('/users', async (req, res) => {
     try {
         const users = await User.find();
-        res.status(200).json(users)
+        if(!users){
+            res.status(401).json({ message: "Não há usuários"})
+        }else{
+            res.status(200).json(users)
+        }
+        
     } catch (err){
         res.status(401).json({ message: err.message});
     }
