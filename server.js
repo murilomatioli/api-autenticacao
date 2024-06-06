@@ -6,9 +6,9 @@ const secretKey = require('./jwt/autentication');
 require("./config/db/connection");
 const User = require('./config/db/models/User');
 
-//importa bcrypt e define 13 a complexidade da criptografia
+//importa bcrypt e define 10 a complexidade da criptografia
 const bcrypt = require('bcrypt')
-const saltRounds = 13;
+const saltRounds = 10;
 
 
 
@@ -55,10 +55,10 @@ app.post('/users', async (req, res) => {
 app.get('/users', async (req, res) => {
     try {
         const users = await User.find();
-        if(!users){
-            res.status(401).json({ message: "Não há usuários"})
-        }else{
+        if(users.length > 0){
             res.status(200).json(users)
+        }else{
+            res.status(403).json({ message: "Não há usuários"})
         }
         
     } catch (err){
@@ -72,13 +72,10 @@ app.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ username })
         const senhaCorreta = await bcrypt.compare(password, user.password)
-        if(!user) {
-            return res.status(403).json({ message: "Usuário incorreto"})
-        }
+        console.log(senhaCorreta)
         if(!senhaCorreta) {
             return res.status(403).json({ message: "Usuário ou senha incorretos"});
         }
-      
         if(user && senhaCorreta){
             const tokenAutenticacao = jwt.sign(
                 {
@@ -96,7 +93,7 @@ app.post('/login', async (req, res) => {
            /* return res.status(200).json({ message: "Autenticado como " + req.body.username});*/
         }
     } catch (err){
-        return res.status(403).json({ message: "Usuário ou senha incorretos"});
+        return res.status(403).json({ message: "Usuário ou senha incorretoss"});
     }
 })
 app.delete('/users', async (req, res) => {
