@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema ({
         required: [true, "Email é obrigatório"],
         unique: [true, "Email ja cadastrado"],
         match: [/^\S+@\S+\.\S+$/, 'Email inválido']
+    },
+    profile: {
+        type: String,
+        required: true,
+        enum: ['user', 'admin'],
+        default: 'user'
     }
 })
 
