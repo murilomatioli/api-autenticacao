@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema ({
         required: [true, "A senha é obrigatória"],
         unique: false,
         minlength: [8, "A senha deve conter pelo menos 8 caracteres"],
-        
     },
     email: {
         type: String,
@@ -24,6 +23,12 @@ const userSchema = new mongoose.Schema ({
         required: true,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    cpf: {
+        type: String,
+        required: [true, "O CPF é obrigatório"],
+        minlength: [11, "O CPF deve contar com 11 caracteres."],
+        maxlength: [11, "O CPF deve contar com 11 caracteres."]
     }
 })
 

@@ -4,6 +4,7 @@ const { verifyJWT } = require('../jwt/autentication');
 const User = require('../db/models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cpfValidator = require('cpf-cnpj-validator')
 const { secretKey } = require('../jwt/autentication');
 
 require('../db/connection')
@@ -33,13 +34,21 @@ router.get('/users', async (req, res) => {
 })
 
 router.post('/users', async (req, res) => {
-    const { username, password, email } = req.body;
+    const { username, password, email, cpf } = req.body;
+    //VALIDAÇÃO DE SENHA
+    if(password.length < 8){
+        return res.status(400).json({ message: "Sua senha deve ter pelo menos 8 caracteres "})
+    }
 
+    //VALIDAÇÃO DO CPF
+    const cpfValid = cpfValidator.cpf.isValid(cpf)
+    console.log("O cpf é válido?: " + cpfValid)
+    if(cpfValid == false){
+        return res.status(400).json({ message: "O cpf é inválido."});
+    }
     try {
         const hash = await bcrypt.hash(password, saltRounds);
-        /*console.log('Senha criptografada: ', hash);*/
-
-        const newUser = new User({ username, password: hash, email });
+        const newUser = new User({ username, password: hash, email , cpf});
         const userSave = await newUser.save();
 
         res.json(userSave);
@@ -55,7 +64,6 @@ router.post('/login', async (req, res) => {
     try {
         const user = await User.findOne({ email })
         const senhaCorreta = await bcrypt.compare(password, user.password)
-        console.log(senhaCorreta)
         if(!senhaCorreta) {
             return res.status(403).json({ message: "Usuário ou senha incorretos"});
         }
@@ -80,7 +88,7 @@ router.post('/login', async (req, res) => {
     }
 })
 
-router.delete('/users', async (req, res) => {
+router.delete('/users', verifyJWT, async (req, res) => {
     try {
         const deleteUser = await User.deleteMany({});
         if(deleteUser.deletedCount == 0){
