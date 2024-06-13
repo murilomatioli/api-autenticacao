@@ -8,8 +8,10 @@ router.get('/', verifyJWT, (req, res) => {
 });
 
 router.get('/users', userController.getUsers);
+router.get('/users/:id', userController.getUserById)
 router.post('/users', userController.createUser);
 router.post('/users/login', userController.loginUser);
 router.delete('/users', userController.deleteUser);
+router.patch('/users/:id', userController.patchUser)
 
 module.exports = router;

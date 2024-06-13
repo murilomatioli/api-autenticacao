@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const cpfValidator = require('cpf-cnpj-validator');
 const { secretKey } = require('../middlewares/jwt/verifyJWT');
 const saltRounds = 10;
+const cepUtil = require('node-cep-util')
 require("../db/connection");
 
 const getUsers = async (req, res) => {
@@ -18,9 +19,20 @@ const getUsers = async (req, res) => {
         res.status(401).json({ message: err.message });
     }
 };
-
+const getUserById = async (req, res) => {
+    const { id } = req.params
+    try {
+        const findUserById = await User.findById(id);
+        if(!findUserById){
+            return res.status(404).json({ message: "Nenhum usuário com esse identificador "})
+        }
+        return res.status(200).json(findUserById)
+    } catch (error) {
+        return res.json(error);
+    }
+}
 const createUser = async (req, res) => {
-    const { username, password, email, cpf } = req.body;
+    const { username, password, email, cpf, cep } = req.body;
 
     // VALIDAR SENHA
     if (password.length < 8) {
@@ -32,15 +44,18 @@ const createUser = async (req, res) => {
     if (!cpfValid) {
         return res.status(400).json({ message: 'O CPF é inválido.' });
     }
-
     try {
         const hash = await bcrypt.hash(password, saltRounds);
-        const newUser = new User({ username, password: hash, email, cpf });
+        const newUser = new User({ username, password: hash, email, cpf, cep });
+        
+        if(cepUtil.isMasked(newUser.cep) == false){
+            newUser.cep = cepUtil.mask(newUser.cep);
+        }
         const userSave = await newUser.save();
-        res.json(userSave);
+        return res.json(userSave);
     } catch (err) {
         console.error(err);
-        res.status(400).json({ message: err.message });
+        return res.status(400).json({ message: err.message });
     }
 };
 
@@ -86,10 +101,29 @@ const deleteUser = async (req, res) => {
         return res.json({ message: 'Erro' });
     }
 };
+const patchUser = async (req, res) => {
+    const { id } = req.params;
+    const { username, password, email } = req.body;
 
+    try {
+        const updateUser = await User.findByIdAndUpdate(id)
+        updateUser.username = username;
+        updateUser.password = password;
+        updateUser.email = email;
+        if(!updateUser){
+            return res.status(404).json({ message: "Não há nenhum usuário com esse identificador."})
+        }
+        const newUser = await updateUser.save();
+        return res.status(200).json(newUser)
+    } catch (error) {
+        return res.status(400).json({ message: "Erro com o servidor"})
+    }
+}
 module.exports = {
     getUsers,
+    getUserById,
     createUser,
     loginUser,
     deleteUser,
+    patchUser,
 };
