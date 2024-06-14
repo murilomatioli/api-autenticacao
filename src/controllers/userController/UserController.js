@@ -1,11 +1,12 @@
-const User = require('../db/models/User');
+const User = require('../../db/models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cpfValidator = require('cpf-cnpj-validator');
-const { secretKey } = require('../middlewares/jwt/verifyJWT');
+const { secretKey } = require('../../middlewares/jwt/verifyJWT');
+const { verifyJWT } = require('../../middlewares/jwt/verifyJWT')
 const saltRounds = 10;
 const cepUtil = require('node-cep-util')
-require("../db/connection");
+require("../../db/connection");
 
 const getUsers = async (req, res) => {
     try {
@@ -47,7 +48,7 @@ const createUser = async (req, res) => {
     try {
         const hash = await bcrypt.hash(password, saltRounds);
         const newUser = new User({ username, password: hash, email, cpf, cep });
-        
+
         if(cepUtil.isMasked(newUser.cep) == false){
             newUser.cep = cepUtil.mask(newUser.cep);
         }
@@ -74,10 +75,13 @@ const loginUser = async (req, res) => {
         }
 
         const tokenAutenticacao = jwt.sign(
-            { userId: user._id },
+            {
+                userId: user._id,
+            },
             secretKey,
-            { expiresIn: 300 }
-        );
+            {
+                expiresIn: 300,
+            });
 
         res.json({
             message: `Autenticado como ${user.username}!`,
