@@ -1,7 +1,7 @@
 const User = require('../../db/models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const cpfValidator = require('cpf-cnpj-validator');
+const nodeCpf = require('node-cpf');
 const { secretKey } = require('../../middlewares/jwt/verifyJWT');
 const { verifyJWT } = require('../../middlewares/jwt/verifyJWT')
 const saltRounds = 10;
@@ -33,21 +33,27 @@ const getUserById = async (req, res) => {
     }
 }
 const createUser = async (req, res) => {
-    const { username, password, email, cpf, cep } = req.body;
-
+    const { username, password, email, cep, profile } = req.body;
+    let { cpf } = req.body
     // VALIDAR SENHA
     if (password.length < 8) {
         return res.status(400).json({ message: 'Sua senha deve ter pelo menos 8 caracteres' });
     }
 
     // VALIDAR CPF
-    const cpfValid = cpfValidator.cpf.isValid(cpf);
+    const cpfValid = nodeCpf.validate(cpf);
     if (!cpfValid) {
         return res.status(400).json({ message: 'O CPF é inválido.' });
     }
+    const cpfMasked = nodeCpf.isMasked(cpf)
+    if(cpfMasked == false){
+        console.log(`Não está mascarado! ${cpf}`)
+        cpf = nodeCpf.mask(cpf)
+        console.log(`Agora está mascarado! ${cpf}`)
+    }
     try {
         const hash = await bcrypt.hash(password, saltRounds);
-        const newUser = new User({ username, password: hash, email, cpf, cep });
+        const newUser = new User({ username, password: hash, email, cpf, cep, profile });
 
         if(cepUtil.isMasked(newUser.cep) == false){
             newUser.cep = cepUtil.mask(newUser.cep);
@@ -80,7 +86,7 @@ const loginUser = async (req, res) => {
             },
             secretKey,
             {
-                expiresIn: 300,
+                expiresIn: 1000,
             });
 
         res.json({
@@ -93,18 +99,7 @@ const loginUser = async (req, res) => {
     }
 };
 
-const deleteUser = async (req, res) => {
-    try {
-        const deleteUser = await User.deleteMany({});
-        if (deleteUser.deletedCount === 0) {
-            return res.json({ message: 'Não há usuários para deletar' });
-        } else {
-            return res.json({ message: `${deleteUser.deletedCount} usuários deletados` });
-        }
-    } catch {
-        return res.json({ message: 'Erro' });
-    }
-};
+
 const patchUser = async (req, res) => {
     const { id } = req.params;
     const { username, password, email } = req.body;
@@ -128,6 +123,5 @@ module.exports = {
     getUserById,
     createUser,
     loginUser,
-    deleteUser,
     patchUser,
 };

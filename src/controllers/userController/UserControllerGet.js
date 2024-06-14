@@ -1,5 +1,4 @@
 const User = require('../../db/models/User');
-const { getUsers } = require('./UserController');
 require("../../db/connection");
 
 const getUserByName = async (req,res) => {

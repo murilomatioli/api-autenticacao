@@ -22,12 +22,11 @@ const userSchema = new mongoose.Schema ({
         type: String,
         required: true,
         enum: ['user', 'admin'],
-        default: 'user'
     },
     cpf: {
         type: String,
-        minlength: [11, "O CPF deve contar com 11 caracteres."],
-        maxlength: [11, "O CPF deve contar com 11 caracteres."],
+        minlength: [11, "O CPF é inválido."],
+        maxlength: [14, "O CPF é inválido."],
         unique: [true, "CPF já cadastrado"]
     },
     cep: {
