@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodeCpf = require('node-cpf');
 const { secretKey } = require('../../middlewares/jwt/verifyJWT');
-const { verifyJWT } = require('../../middlewares/jwt/verifyJWT')
 const saltRounds = 10;
 const cepUtil = require('node-cep-util')
 require("../../db/connection");
@@ -39,7 +38,10 @@ const createUser = async (req, res) => {
     if (password.length < 8) {
         return res.status(400).json({ message: 'Sua senha deve ter pelo menos 8 caracteres' });
     }
-
+    console.log(profile);
+    if(profile != "admin" && profile != "user"){
+        return res.status(400).json({ message: 'Profile inválido'})
+    }
     // VALIDAR CPF
     const cpfValid = nodeCpf.validate(cpf);
     if (!cpfValid) {
