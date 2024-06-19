@@ -34,6 +34,15 @@ const userSchema = new mongoose.Schema ({
         minlength: [8, "Insira um cep válido"],
         maxlength: [9, "Insira um cep válido"],
         required: true
+    },
+    celular: {
+        type: String,
+        minlength: [11, "Telefone celular inválido"],
+        unique: true
+    },
+    fixo: {
+        type: String,
+        minlength: [10, "Telefone fixo inválido"]
     }
 })
 

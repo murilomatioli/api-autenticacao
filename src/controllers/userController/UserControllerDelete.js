@@ -1,6 +1,6 @@
 const User = require('../../db/models/User');
 require("../../db/connection");
-
+//deletar usuarios que nao sao adms
 const deleteUser = async (req, res) => {
     try {
         const deleteUser = await User.deleteMany({ profile: 'user'});
@@ -13,6 +13,7 @@ const deleteUser = async (req, res) => {
         return res.json({ message: 'Erro' });
     }
 };
+//deletar todos os usuarios
 const deleteAllData = async (req, res) => {
     try {
         const deleteUsers = await User.deleteMany({})

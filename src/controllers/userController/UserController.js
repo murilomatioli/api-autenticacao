@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const nodeCpf = require('node-cpf');
 const { secretKey } = require('../../middlewares/jwt/verifyJWT');
 const saltRounds = 10;
+const format = require('telefone/format')
+const parse = require('telefone/parse')
 const cepUtil = require('node-cep-util')
 require("../../db/connection");
 
@@ -33,12 +35,12 @@ const getUserById = async (req, res) => {
 }
 const createUser = async (req, res) => {
     const { username, password, email, cep, profile } = req.body;
-    let { cpf } = req.body
+    let { cpf, celular, fixo } = req.body
     // VALIDAR SENHA
     if (password.length < 8) {
         return res.status(400).json({ message: 'Sua senha deve ter pelo menos 8 caracteres' });
     }
-    console.log(profile);
+    // VALIDA O PROFILE
     if(profile != "admin" && profile != "user"){
         return res.status(400).json({ message: 'Profile inválido'})
     }
@@ -53,9 +55,27 @@ const createUser = async (req, res) => {
         cpf = nodeCpf.mask(cpf)
         console.log(`Agora está mascarado! ${cpf}`)
     }
+    // FORMATAR CELULAR
+    celular = parse(celular, {apenasCelular: true})
+    if(celular == null){
+        return res.status(400).json({ message: 'O número de celular é inválido.' })
+    }
+
+    if(celular.length >= 11){
+        celular = format(celular)
+    }
+    // FORMATAR FIXO
+    fixo = parse(fixo, {apenasFixo: true})
+    if(fixo == null){
+        return res.status(400).json({ message: 'O número de telefone fixo é inválido.' })
+    }
+    if(fixo.length >= 10){
+        fixo = format(fixo)
+    }
+
     try {
         const hash = await bcrypt.hash(password, saltRounds);
-        const newUser = new User({ username, password: hash, email, cpf, cep, profile });
+        const newUser = new User({ username, password: hash, email, cpf, cep, profile, celular, fixo });
 
         if(cepUtil.isMasked(newUser.cep) == false){
             newUser.cep = cepUtil.mask(newUser.cep);
@@ -104,13 +124,14 @@ const loginUser = async (req, res) => {
 
 const patchUser = async (req, res) => {
     const { id } = req.params;
-    const { username, password, email } = req.body;
+    const { username, password, email, celular } = req.body;
 
     try {
         const updateUser = await User.findByIdAndUpdate(id)
         updateUser.username = username;
         updateUser.password = password;
         updateUser.email = email;
+        update.User.celular = celular;
         if(!updateUser){
             return res.status(404).json({ message: "Não há nenhum usuário com esse identificador."})
         }
