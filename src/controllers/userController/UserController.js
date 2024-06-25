@@ -8,9 +8,16 @@ const format = require('telefone/format')
 const parse = require('telefone/parse')
 const cepUtil = require('node-cep-util')
 require("../../db/connection");
+const { verifyJWT } = require('../../middlewares/jwt/verifyJWT');
+
 
 const getUsers = async (req, res) => {
     try {
+        const userPermission = req.userPermission;
+        if(userPermission == 0){
+            return res.status(401).json({ message: "Não autorizado a acessar esta rota."})
+        }
+
         const users = await User.find();
         if (users.length > 0) {
             res.status(200).json(users);
@@ -22,6 +29,7 @@ const getUsers = async (req, res) => {
     }
 };
 const getUserById = async (req, res) => {
+
     const { id } = req.params
     try {
         const findUserById = await User.findById(id);
@@ -90,7 +98,6 @@ const createUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
-
     try {
         const user = await User.findOne({ email });
         if (!user) {
@@ -101,6 +108,8 @@ const loginUser = async (req, res) => {
         if (!senhaCorreta) {
             return res.status(403).json({ message: "Usuário ou senha incorretos" });
         }
+        const usuarioLogado = user.profile
+        //console.log(`O usuário que se logou é um ${user.profile}`);
 
         const tokenAutenticacao = jwt.sign(
             {
@@ -110,9 +119,9 @@ const loginUser = async (req, res) => {
             {
                 expiresIn: 1000,
             });
-
+        
         res.json({
-            message: `Autenticado como ${user.username}!`,
+            message: `Autenticado como ${user.username}! profile: ${user.profile}`,
             auth: true,
             tokenAutenticacao
         });

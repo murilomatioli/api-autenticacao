@@ -25,24 +25,24 @@ const userSchema = new mongoose.Schema ({
     },
     cpf: {
         type: String,
-        minlength: [11, "O CPF é inválido."],
-        maxlength: [14, "O CPF é inválido."],
+        minlength: [11, "O CPF tem menos de 11 caracteres."],
+        maxlength: [14, "O CPF tem masi que 14 caracteres."],
         unique: [true, "CPF já cadastrado"]
     },
     cep: {
         type: String,
-        minlength: [8, "Insira um cep válido"],
-        maxlength: [9, "Insira um cep válido"],
+        minlength: [8, "O cep tem menos que 8 caracteres"],
+        maxlength: [9, "O cep tem mais que 8 caracteres"],
         required: true
     },
     celular: {
         type: String,
-        minlength: [11, "Telefone celular inválido"],
+        minlength: [11, "Telefone celular com menos de 11 caracteres"],
         unique: true
     },
     fixo: {
         type: String,
-        minlength: [10, "Telefone fixo inválido"]
+        minlength: [10, "O fixo tem menos de 10 caracteres"]
     }
 })
 
