@@ -41,6 +41,32 @@ const getUserById = async (req, res) => {
         return res.json(error);
     }
 }
+const getUserByName = async (req,res) => {
+    const { username } = req.params;
+
+    try {
+    const findUserByName = await User.findOne({ username })
+    if(!findUserByName){
+        return res.status(404).json({ message: "Não existe ninguém com esse username."})
+    }
+    return res.status(200).json(findUserByName);
+    } catch (error) {
+        return res.status(500).json(error)
+    }   
+};
+const getUserByEmail = async (req,res) => {
+    const { email } = req.params
+
+    try {
+        const findUserByEmail = await User.findOne({ email });
+        if(!findUserByEmail){
+            return res.status(404).json({ message: "Não existe ninguém com esse email."})
+        }
+        return res.status(200).json(findUserByEmail)
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+}
 const createUser = async (req, res) => {
     const { username, password, email, cep, profile } = req.body;
     let { cpf, celular, fixo } = req.body
@@ -129,7 +155,40 @@ const loginUser = async (req, res) => {
         return res.status(403).json({ message: "Usuário ou senha incorretos" });
     }
 };
+const deleteUser = async (req, res) => {
+    try {
+        const userPermission = req.userPermission;
+        if(userPermission == 0){
+            return res.status(401).json({ message: "Não autorizado a acessar esta rota."})
+        }
+        const deleteUser = await User.deleteMany({ profile: 'user'});
+        if (deleteUser.deletedCount === 0) {
+            return res.json({ message: 'Não há usuários para deletar' });
+        } else {
+            return res.json({ message: `${deleteUser.deletedCount} usuários deletados` });
+        }
+    } catch {
+        return res.json({ message: 'Erro' });
+    }
+};
 
+const deleteAllData = async (req, res) => {
+    //deletar todos os usuarios
+    try {
+        const userPermission = req.userPermission;
+        if(userPermission == 0){
+            return res.status(401).json({ message: "Não autorizado a acessar esta rota."})
+        }
+        const deleteUsers = await User.deleteMany({})
+        if (deleteUsers.deletedCount === 0) {
+            return res.json({ message: 'Não há usuários para deletar' });
+        } else {
+            return res.json({ message: `${deleteUsers.deletedCount} usuários deletados` });
+        }
+    } catch {
+        return res.json({ message: 'Erro' });
+    }
+}
 
 const patchUser = async (req, res) => {
     const { id } = req.params;
@@ -153,7 +212,11 @@ const patchUser = async (req, res) => {
 module.exports = {
     getUsers,
     getUserById,
+    getUserByName,
+    getUserByEmail,
     createUser,
     loginUser,
+    deleteUser,
+    deleteAllData,
     patchUser,
 };
