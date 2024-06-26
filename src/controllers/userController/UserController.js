@@ -7,8 +7,8 @@ const saltRounds = 10;
 const format = require('telefone/format')
 const parse = require('telefone/parse')
 const cepUtil = require('node-cep-util')
+const blacklist = require('express-jwt-blacklist')
 require("../../db/connection");
-const { verifyJWT } = require('../../middlewares/jwt/verifyJWT');
 
 
 const getUsers = async (req, res) => {
@@ -134,8 +134,6 @@ const loginUser = async (req, res) => {
         if (!senhaCorreta) {
             return res.status(403).json({ message: "Usuário ou senha incorretos" });
         }
-        const usuarioLogado = user.profile
-        //console.log(`O usuário que se logou é um ${user.profile}`);
 
         const tokenAutenticacao = jwt.sign(
             {
@@ -155,6 +153,18 @@ const loginUser = async (req, res) => {
         return res.status(403).json({ message: "Usuário ou senha incorretos" });
     }
 };
+const logoutUser = async (req, res) => {
+    try {
+        const token = req.token;
+        if(token){
+            return res.json({ message: `Token revogado ${token}`})
+        }
+        return res.status(400).json({ message: `Token inválido` });
+    } catch {
+        return res.status(400).json({ message: "erro ao fazer logout"});
+    }
+};
+
 const deleteUser = async (req, res) => {
     try {
         const userPermission = req.userPermission;
@@ -216,6 +226,7 @@ module.exports = {
     getUserByEmail,
     createUser,
     loginUser,
+    logoutUser,
     deleteUser,
     deleteAllData,
     patchUser,

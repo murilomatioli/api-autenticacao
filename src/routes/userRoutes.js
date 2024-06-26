@@ -15,8 +15,6 @@ router.get('/', verifyJWT, (req, res) => {
         console.log("Logado como admin")
         return res.json({ message: "Logado como admin"})
     }
-
-    res.json({ message: 'Acessou a rota com sucesso!' });
 });
 
 router.get('/users', verifyJWT, userController.getUsers);
@@ -25,6 +23,7 @@ router.get('/users/username/:username', userController.getUserByName)
 router.get('/users/email/:email', userController.getUserByEmail)
 router.post('/users', userController.createUser);
 router.post('/users/login', userController.loginUser);
+router.post('/users/logout', verifyJWT, userController.logoutUser);
 router.delete('/users', userController.deleteUser);
 router.delete('/users/all', userController.deleteAllData)
 router.patch('/users/:id', userController.patchUser)
