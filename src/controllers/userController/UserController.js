@@ -1,4 +1,5 @@
 const User = require('../../db/models/User');
+const Blacklist = require('../../db/models/BlackList')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodeCpf = require('node-cpf');
@@ -7,7 +8,6 @@ const saltRounds = 10;
 const format = require('telefone/format')
 const parse = require('telefone/parse')
 const cepUtil = require('node-cep-util')
-const blacklist = require('express-jwt-blacklist')
 require("../../db/connection");
 
 
@@ -150,21 +150,31 @@ const loginUser = async (req, res) => {
             tokenAutenticacao
         });
     } catch (err) {
-        return res.status(403).json({ message: "Usuário ou senha incorretos" });
+        return res.status(500).json({ message: "Erro interno" });
     }
 };
 const logoutUser = async (req, res) => {
     try {
         const token = req.token;
         if(token){
-            return res.json({ message: `Token revogado ${token}`})
+            const blackListToken = new Blacklist({ token })
+            const saveToken = await blackListToken.save()
+            return res.status(201).json({ message: `Logout realizado com sucesso`})
         }
-        return res.status(400).json({ message: `Token inválido` });
+        return res.status(404).json({ message: `O token não foi encontrado` });
     } catch {
-        return res.status(400).json({ message: "erro ao fazer logout"});
+        return res.status(500).json({ message: "erro ao fazer logout"});
     }
 };
-
+const deleteAccount = async (req, res) => {
+    try {
+        const userId = req.userId
+        const deleteOwn = await User.findByIdAndDelete(userId)
+        res.status(200).json({ message: `Deletou o próprio usuário: ${deleteOwn.username}`})
+    } catch {
+        
+    }
+}
 const deleteUser = async (req, res) => {
     try {
         const userPermission = req.userPermission;
@@ -173,12 +183,12 @@ const deleteUser = async (req, res) => {
         }
         const deleteUser = await User.deleteMany({ profile: 'user'});
         if (deleteUser.deletedCount === 0) {
-            return res.json({ message: 'Não há usuários para deletar' });
+            return res.status(400).json({ message: 'Não há usuários para deletar' });
         } else {
-            return res.json({ message: `${deleteUser.deletedCount} usuários deletados` });
+            return res.status(204).json({ message: `${deleteUser.deletedCount} usuários deletados` });
         }
     } catch {
-        return res.json({ message: 'Erro' });
+        return res.status(500).json({ message: 'Erro interno' });
     }
 };
 
@@ -228,6 +238,7 @@ module.exports = {
     loginUser,
     logoutUser,
     deleteUser,
+    deleteAccount,
     deleteAllData,
     patchUser,
 };

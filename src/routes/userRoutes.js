@@ -24,8 +24,9 @@ router.get('/users/email/:email', userController.getUserByEmail)
 router.post('/users', userController.createUser);
 router.post('/users/login', userController.loginUser);
 router.post('/users/logout', verifyJWT, userController.logoutUser);
-router.delete('/users', userController.deleteUser);
-router.delete('/users/all', userController.deleteAllData)
+router.delete('/users', verifyJWT, userController.deleteUser);
+router.delete('/users/own', verifyJWT, userController.deleteAccount)
+router.delete('/users/all', verifyJWT, userController.deleteAllData)
 router.patch('/users/:id', userController.patchUser)
 
 module.exports = router;
