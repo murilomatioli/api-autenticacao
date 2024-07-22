@@ -68,15 +68,15 @@ const getUserByEmail = async (req,res) => {
     }
 }
 const createUser = async (req, res) => {
-    const { username, password, email, cep, profile } = req.body;
-    let { cpf, celular, fixo } = req.body
+    const { username, password, email, cep } = req.body;
+    let { cpf, celular, fixo, profile } = req.body
     // VALIDAR SENHA
     if (password.length < 8) {
         return res.status(400).json({ message: 'Sua senha deve ter pelo menos 8 caracteres' });
     }
     // VALIDA O PROFILE
     if(profile != "admin" && profile != "user"){
-        return res.status(400).json({ message: 'Profile inválido'})
+        profile = "user"
     }
     // VALIDAR CPF
     const cpfValid = nodeCpf.validate(cpf);
