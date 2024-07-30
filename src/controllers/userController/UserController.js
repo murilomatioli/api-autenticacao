@@ -7,7 +7,8 @@ const { secretKey } = require('../../middlewares/jwt/verifyJWT');
 const saltRounds = 10;
 const format = require('telefone/format')
 const parse = require('telefone/parse')
-const cepUtil = require('node-cep-util')
+const cepUtil = require('node-cep-util');
+const BlackList = require('../../db/models/BlackList');
 require("../../db/connection");
 
 
@@ -141,7 +142,7 @@ const loginUser = async (req, res) => {
             },
             secretKey,
             {
-                expiresIn: 1000,
+                expiresIn: '2h',
             });
         
         res.json({
@@ -155,12 +156,26 @@ const loginUser = async (req, res) => {
 };
 const logoutUser = async (req, res) => {
     try {
+        const interval = 7200000; //2 horas
+
         const token = req.token;
         if(token){
             const blackListToken = new Blacklist({ token })
+            console.log(blackListToken.id)
             const saveToken = await blackListToken.save()
-            return res.status(201).json({ message: `Logout realizado com sucesso`})
+            const intervalId = setInterval(async () => {
+                console.log('Deletou o token')
+                const killToken = await BlackList.findByIdAndDelete(blackListToken.id)
+            }, interval)
+
+            setTimeout(() => {
+                clearInterval(intervalId)
+            }, interval)
+            
+            return res.status(201).json({ message: `O logout realizado com sucesso`})
+            
         }
+        
         return res.status(404).json({ message: `O token não foi encontrado` });
     } catch {
         return res.status(500).json({ message: "erro ao fazer logout"});

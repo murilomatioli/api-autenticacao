@@ -11,7 +11,7 @@ async function verifyJWT (req, res, next) {
     if(listTokens){
         return res.status(401).json({ message: "Esse token já fez logout"})
     }
-    if (token.length == 0){ 
+    if (!token){ 
         return res.status(401).json({ auth: false, message: 'Token não informado.' });
     }
 

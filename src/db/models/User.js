@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema ({
     cpf: {
         type: String,
         minlength: [11, "O CPF tem menos de 11 caracteres."],
-        maxlength: [14, "O CPF tem masi que 14 caracteres."],
+        maxlength: [14, "O CPF tem mais que 14 caracteres."],
         unique: [true, "CPF já cadastrado"]
     },
     cep: {
