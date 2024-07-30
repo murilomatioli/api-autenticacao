@@ -6,12 +6,10 @@ const userController = require('../controllers/userController/UserController');
 router.get('/', verifyJWT, (req, res) => {
     const userPermission = req.userPermission;
     if(userPermission == 0){
-        console.log("Conceder todas as permissões");
         console.log("Logado como user")
         return res.json({ message: "Logado como user"})
     }
     if(userPermission == 1){
-        console.log("Limitar permissões");
         console.log("Logado como admin")
         return res.json({ message: "Logado como admin"})
     }

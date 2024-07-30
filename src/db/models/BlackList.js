@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
 
-let listSchema = mongoose.Schema({
+const listSchema = mongoose.Schema({
     token: String,
-}, {timestamps: true});
+    expireDate: {
+        type: Date
+    },
+}, { timestamps: true 
 
-listSchema.index({createdAt: 1},{expiresIn: 300 + (3 * 3600)});
+});
+
+listSchema.index({ "expireDate": 1 }, { expireAfterSeconds: 10 });
 
 module.exports = mongoose.model("blacklist", listSchema);
