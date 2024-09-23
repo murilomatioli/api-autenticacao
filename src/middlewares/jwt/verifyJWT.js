@@ -1,16 +1,10 @@
 const jwt = require('jsonwebtoken');
 const secretKey = 'jsurkfkkisaoasdkajlfiojife9991234sifskdnfsdv890892342jkhsdbhfv';
 const User = require('../../db/models/User')
-const BlackList = require('../../db/models/BlackList')
-
 
 async function verifyJWT (req, res, next) {
     const token = req.headers['x-access-token'];
-    const listTokens = await BlackList.findOne({ token })
 
-    if(listTokens){
-        return res.status(401).json({ message: "Esse token já fez logout"})
-    }
     if (!token){ 
         return res.status(401).json({ auth: false, message: 'Token não informado.' });
     }
@@ -22,7 +16,7 @@ async function verifyJWT (req, res, next) {
         req.userId = decoded.userId;
         const id = req.userId
         req.token = token
-        const user = await User.findById(id)
+        const user = await User.findByPk(id)
         console.log("Usuário logado: " + user)
 
         if(user.profile == 'admin'){

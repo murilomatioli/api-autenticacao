@@ -20,8 +20,7 @@ router.get('/users/:id', userController.getUserById)
 router.get('/users/username/:username', userController.getUserByName)
 router.get('/users/email/:email', userController.getUserByEmail)
 router.post('/users', userController.createUser);
-router.post('/users/login', userController.loginUser);
-router.post('/users/logout', verifyJWT, userController.logoutUser);
+router.post('/users/login', userController.login);
 router.delete('/users', verifyJWT, userController.deleteUser);
 router.delete('/users/own', verifyJWT, userController.deleteAccount)
 router.delete('/users/all', verifyJWT, userController.deleteAllData)
